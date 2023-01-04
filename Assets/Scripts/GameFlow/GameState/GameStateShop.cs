@@ -12,6 +12,7 @@ public class GameStateShop : GameState
     public GameObject menuUI;
     public TextMeshProUGUI fishCountText;
     public TextMeshProUGUI currentHatName;
+    public HatLogic hatLogic;
 
 
     //shop item
@@ -23,12 +24,13 @@ public class GameStateShop : GameState
     {
         hats = Resources.LoadAll<Hat>("Hat/");
         PopulateShop();
+        currentHatName.text = hats[SaveManager.ins.save.CurrentHatIndex].ItemName;
     }
 
     public override void Construct()
     {
         GameManager.ins.ChangeCamera(GameCamera.Shop);
-        fishCountText.text = SaveManager.ins.save.Fish.ToString();
+        fishCountText.text = SaveManager.ins.save.Fish.ToString("000");
         menuUI.SetActive(true);
     }
 
@@ -51,14 +53,38 @@ public class GameStateShop : GameState
             //name
             go.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = hats[i].ItemName;
             //price
-            go.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = hats[i].ItemPrice;
+            if (SaveManager.ins.save.UnlockedHatFlag[i] == 0)
+                go.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = hats[i].ItemPrice.ToString();
+            else
+                go.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = "";
+
         }
     }
 
     private void OnHatClick(int i)
     {
-        Debug.Log(i);
-        currentHatName.text = hats[i].ItemName;
+        if (SaveManager.ins.save.UnlockedHatFlag[i] == 1)
+        {
+            SaveManager.ins.save.CurrentHatIndex = i;
+            currentHatName.text = hats[i].ItemName;
+            hatLogic.SelectedHat(i);
+            SaveManager.ins.Save();
+        }
+        else if (hats[i].ItemPrice <= SaveManager.ins.save.Fish)
+        {
+            SaveManager.ins.save.Fish -= hats[i].ItemPrice;
+            SaveManager.ins.save.UnlockedHatFlag[i] = 1;
+            SaveManager.ins.save.CurrentHatIndex = i;
+            currentHatName.text = hats[i].ItemName;
+            hatLogic.SelectedHat(i);
+            fishCountText.text = SaveManager.ins.save.Fish.ToString("000");
+            SaveManager.ins.Save();
+            hatContainer.GetChild(i).transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = "";
+        }
+        else
+        {
+            //not enough fish
+        }
     }
 
     public void OnHomeClick()

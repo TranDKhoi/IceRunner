@@ -4,6 +4,7 @@ using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Advertisements;
 
 public class GameStateDeath : GameState
 {
@@ -79,4 +80,16 @@ public class GameStateDeath : GameState
         GameManager.ins.playerMotor.RespawnPlayer();
         brain.ChangeState(GetComponent<GameStatePlay>());
     }
+
+    public void TryResumeGame()
+    {
+        AdManager.ins.ShowAd();
+        AdManager.ins.OnAdDone += () =>
+        {
+            completionCircle.gameObject.SetActive(false);
+            ResumeGame();
+        };
+
+    }
+
 }

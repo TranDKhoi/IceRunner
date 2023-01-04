@@ -6,7 +6,7 @@ using UnityEngine;
 public class Hat : ScriptableObject
 {
     public string ItemName;
-    public string ItemPrice;
+    public int ItemPrice;
     public Sprite Icon;
     public GameObject Model;
 }
